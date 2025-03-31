@@ -84,4 +84,4 @@ const FeatureCard = ({ title, description }) => {
       <p>{description}</p>
     </div>
   );
-};
+};npm install next react react-dom
