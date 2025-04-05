@@ -1,87 +1,38 @@
-import React from "react";
-import { motion } from "framer-motion";
+// Dhibot AI – Admin Dashboard with Dark Mode & Animations // Tech Stack: React, Tailwind, Framer Motion, Axios, FileSaver.js
 
-// Custom Button Component
-const Button = ({ children, className = "", onClick }) => {
-  return (
-    <button
-      className={`px-6 py-3 rounded-lg font-medium hover:bg-opacity-80 ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-};
+import React, { useEffect, useState } from "react"; import axios from "axios"; import { saveAs } from "file-saver"; import { motion } from "framer-motion";
 
-// Home Page Component
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-700 to-purple-600 text-white flex flex-col">
-      {/* Header Section */}
-      <header className="flex justify-between items-center p-5">
-        <h1 className="text-3xl font-extrabold">Dhibot AI</h1>
-        <nav className="space-x-4">
-          <Button className="bg-purple-800">Home</Button>
-          <Button className="bg-purple-800">Features</Button>
-          <Button className="bg-purple-800">Pricing</Button>
-          <Button className="bg-purple-800">Blog</Button>
-          <Button className="bg-purple-800">Contact</Button>
-        </nav>
-      </header>
+function AdminDashboard() { const [loggedIn, setLoggedIn] = useState(false); const [password, setPassword] = useState("");
 
-      {/* Hero Section */}
-      <main className="flex-grow flex flex-col items-center justify-center">
-        <motion.h1
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-6xl font-extrabold mb-4"
-        >
-          Welcome to Dhibot AI
-        </motion.h1>
-        <p className="text-xl mb-6 text-center max-w-xl">
-          Transforming industries with Hyper-Personalized AI Solutions, Real-Time Multilingual Support, and more!
-        </p>
-        <Button className="bg-blue-500">Get Started</Button>
-      </main>
+const [leads, setLeads] = useState([]); const [filteredLeads, setFilteredLeads] = useState([]); const [searchLead, setSearchLead] = useState("");
 
-      {/* Features Section */}
-      <section className="p-10 bg-white text-black">
-        <h2 className="text-4xl font-bold text-center mb-8">Our Features</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FeatureCard
-            title="Hyper-Personalization"
-            description="Tailored AI experiences for every user."
-          />
-          <FeatureCard
-            title="Domain Expertise"
-            description="Custom solutions for business-specific needs."
-          />
-          <FeatureCard
-            title="Real-Time Translation"
-            description="Multilingual communication made seamless."
-          />
-          <FeatureCard
-            title="Emotional Intelligence"
-            description="AI that understands and empathizes."
-          />
-        </div>
-      </section>
+const [cnc, setCNC] = useState([]); const [filteredCNC, setFilteredCNC] = useState([]); const [searchCNC, setSearchCNC] = useState("");
 
-      {/* Footer Section */}
-      <footer className="p-5 bg-purple-800 text-center">
-        <p>&copy; 2025 Dhibot AI. All Rights Reserved.</p>
-      </footer>
-    </div>
-  );
-}
+const [quiz, setQuiz] = useState([]); const [filteredQuiz, setFilteredQuiz] = useState([]); const [searchQuiz, setSearchQuiz] = useState("");
 
-// Feature Card Component
-const FeatureCard = ({ title, description }) => {
-  return (
-    <div className="p-5 border rounded-lg hover:shadow-lg transition">
-      <h3 className="text-2xl font-bold mb-2">{title}</h3>
-      <p>{description}</p>
-    </div>
-  );
-};npm install next react react-dom
+const [pageLead, setPageLead] = useState(1); const [pageCNC, setPageCNC] = useState(1); const [pageQuiz, setPageQuiz] = useState(1); const itemsPerPage = 5;
+
+useEffect(() => { if (loggedIn) { fetchAllData(); } }, [loggedIn]);
+
+useEffect(() => handleSearchLead(), [searchLead, leads]); useEffect(() => handleSearchCNC(), [searchCNC, cnc]); useEffect(() => handleSearchQuiz(), [searchQuiz, quiz]);
+
+const login = () => { if (password === "admin123") setLoggedIn(true); else alert("Wrong password"); };
+
+const fetchAllData = async () => { const resLeads = await axios.get("http://localhost:5000/api/crm/leads"); const resCNC = await axios.get("http://localhost:5000/api/cnc/logs"); const resQuiz = await axios.get("http://localhost:5000/api/quiz/results"); setLeads(resLeads.data); setFilteredLeads(resLeads.data); setCNC(resCNC.data); setFilteredCNC(resCNC.data); setQuiz(resQuiz.data); setFilteredQuiz(resQuiz.data); };
+
+const exportToCSV = (data, filename) => { const csv = [ Object.keys(data[0]).join(","), ...data.map(row => Object.values(row).map(val => "${val}").join(",")) ].join("\n"); const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" }); saveAs(blob, filename); };
+
+const handleSearchLead = () => { const filtered = leads.filter(item => item.name.toLowerCase().includes(searchLead.toLowerCase()) || item.email.toLowerCase().includes(searchLead.toLowerCase()) || item.message.toLowerCase().includes(searchLead.toLowerCase()) ); setFilteredLeads(filtered); setPageLead(1); };
+
+const handleSearchCNC = () => { const filtered = cnc.filter(item => item.command.toLowerCase().includes(searchCNC.toLowerCase()) || item.output.toLowerCase().includes(searchCNC.toLowerCase()) ); setFilteredCNC(filtered); setPageCNC(1); };
+
+const handleSearchQuiz = () => { const filtered = quiz.filter(item => item.username.toLowerCase().includes(searchQuiz.toLowerCase()) ); setFilteredQuiz(filtered); setPageQuiz(1); };
+
+const paginate = (data, page) => data.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+if (!loggedIn) { return ( <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center"> <motion.div className="max-w-md w-full p-6 bg-gray-800 rounded shadow text-center" initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} > <h2 className="text-2xl font-semibold mb-4">Admin Login</h2> <input type="password" className="border border-gray-600 bg-gray-700 text-white p-2 w-full mb-4 rounded" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} /> <button className="bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded" onClick={login}>Login</button> </motion.div> </div> ); }
+
+return ( <div className="min-h-screen bg-gray-900 text-white p-6 space-y-8"> <motion.h1 className="text-3xl font-bold text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}> Dhibot Admin Dashboard </motion.h1>
+
+<Section ...
+
