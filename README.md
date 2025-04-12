@@ -35,4 +35,4 @@ if (!loggedIn) { return ( <div className="min-h-screen bg-gray-900 text-white fl
 return ( <div className="min-h-screen bg-gray-900 text-white p-6 space-y-8"> <motion.h1 className="text-3xl font-bold text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }}> Dhibot Admin Dashboard </motion.h1>
 
 <Section ...
-
+npm install next
